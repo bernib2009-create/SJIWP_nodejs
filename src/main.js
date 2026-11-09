@@ -1,20 +1,28 @@
-import formatExpense from "./format.js";
+import formatExpense, {currency} from "./format.js";
+import { loadExpenses, saveExpenses } from "./storage.js";
 
 const APP_NAME = "Troškovnik";
 console.log(`== ${APP_NAME} ==`);
 
-const args = process.argv.slice(2);
+/* const args = process.argv.slice(2);
 const command = args[0];
 const arg1 = args[1];
-const arg2 = args[2];
-console.log("Naredba:", command);
-console.log("Prvi argument:", arg1);
-console.log("Drugi argument:", arg2);
+const arg2 = args[2]; */
 
-const expenses = [
-    { id: 1, description: "Kruh", amount: 2.5 },
-    { id: 2, description: "Kino", amount: 12 },
-];
+const [command, arg1, arg2] = process.argv.slice(2); // <- polje
+//     ^ destrukturiranje polja
+
+/* console.log("Naredba:", command);
+console.log("Prvi argument:", arg1);
+console.log("Drugi argument:", arg2); */
+
+let expenses;
+try {
+    expenses = loadExpenses();
+} catch (error) {
+    console.error(`Datoteka expenses.json nije ispravna: ${error.message}`);
+    process.exit(1);
+}
 
 switch (command) {
 
@@ -31,6 +39,9 @@ switch (command) {
         }
 
         expenses.push({id: newId, description: arg1, amount: amount});
+
+        saveExpenses(expenses);
+
         console.log(`Dodano: ${arg1} (id: ${newId})`);
         break;
 
@@ -38,10 +49,13 @@ switch (command) {
         if (expenses.length === 0) {
             console.log("Nema troškova.");
         } else {
-            for (let i = 0; i < expenses.length; i++){
+            /* for (let i = 0; i < expenses.length; i++){
                 const expense = expenses [i];
-                console.log(formatExpense(expense)); // nastavljamo 
-            }
+                console.log(formatExpense(expense)); 
+            } */
+
+            expenses.forEach((expense) => console.log(formatExpense(expense)));
+
         }
 
         break;
@@ -53,7 +67,7 @@ switch (command) {
         for (const expense of expenses) {
             total = total + expense.amount;
         }
-        console.log(`Ukupno: ${total}`);
+        console.log(`Ukupno: ${total} ${currency}`);
 
         break;
 
